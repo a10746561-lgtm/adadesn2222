@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Soul Play — компьютерный клуб и игровые залы в Новочебоксарске</title>
+<meta name="description" content="Soul Play — компьютерный клуб в Новочебоксарске: игровые ПК, PS5, VIP-залы. Бронирование онлайн." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root{
+    --bg:        #05050a;
+    --panel:     rgba(255,255,255,.045);
+    --panel-2:   rgba(255,255,255,.07);
+    --stroke:    rgba(255,255,255,.10);
+    --stroke-2:  rgba(255,255,255,.18);
+    --text:      #eef0f6;
+    --muted:     #9aa0b4;
+    --violet:    #7c5cff;
+    --cyan:      #22d3ee;
+    --gold:      #ffb86b;
+    --pink:      #ff5c9d;
+    --lime:      #a3e635;
+    --teal:      #2dd4bf;
+    --rose:      #fb7185;
+    --radius:    22px;
+    --ease:      cubic-bezier(.22,1,.36,1);
+  }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  ::selection{ background:rgba(124,92,255,.45); color:#fff; }
+
+  /* ============ ФОН ============ */
+  .bg{
+    position:fixed; inset:0; z-index:-1; overflow:hidden;
+    background:
+      radial-gradient(1200px 800px at 50% -10%, #17102e 0%, transparent 62%),
+      radial-gradient(900px 700px at 105% 105%, #0a1c24 0%, transparent 60%),
+      radial-gradient(700px 600px at -10% 90%, #1d0f22 0%, transparent 60%),
+      var(--bg);
+  }
+  .orb{
+    position:absolute; border-radius:50%; filter:blur(90px); opacity:.55;
+    mix-blend-mode:screen; will-change:transform;
+    animation:drift 22s ease-in-out infinite;
+  }
+  .orb-1{ width:62vmax; height:62vmax; top:-24vmax; left:-18vmax;
+    background:radial-gradient(circle at 35% 35%, var(--violet), transparent 62%); animation-duration:26s; }
+  .orb-2{ width:48vmax; height:48vmax; top:8vmax; right:-18vmax;
+    background:radial-gradient(circle at 50% 50%, var(--cyan), transparent 62%); opacity:.42; animation-duration:31s; animation-delay:-8s; }
+  .orb-3{ width:44vmax; height:44vmax; bottom:-18vmax; left:28%;
+    background:radial-gradient(circle at 50% 50%, var(--pink), transparent 65%); opacity:.35; animation-duration:35s; animation-delay:-16s; }
+  .orb-4{ width:26vmax; height:26vmax; top:38%; left:8%;
+    background:radial-gradient(circle at 50% 50%, var(--gold), transparent 65%); opacity:.22; animation-duration:28s; animation-delay:-4s; }
+
+  @keyframes drift{
+    0%,100% { transform:translate3d(0,0,0) scale(1); }
+    33%     { transform:translate3d(6vmax,-5vmax,0) scale(1.12); }
+    66%     { transform:translate3d(-6vmax,5vmax,0) scale(.92); }
+  }
+
+  .grid{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(circle at 50% 35%, #000 0%, transparent 72%);
+            mask-image:radial-gradient(circle at 50% 35%, #000 0%, transparent 72%);
+    opacity:.7;
+  }
+
+  .noise{
+    position:absolute; inset:-60%;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+    opacity:.055; mix-blend-mode:overlay; pointer-events:none;
+    animation:grain 9s steps(8) infinite;
+  }
+  @keyframes grain{
+    0%,100%{transform:translate(0,0)} 20%{transform:translate(-4%,-8%)}
+    40%{transform:translate(-8%,4%)} 60%{transform:translate(4%,-4%)}
+    80%{transform:translate(-2%,8%)}
+  }
+
+  .cursor-glow{
+    position:absolute; inset:0;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),
+      rgba(124,92,255,.16), transparent 62%);
+    transition:background .18s ease-out; pointer-events:none;
+  }
+
+  /* ============ ХЕДЕР ============ */
+  .header{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+    background:linear-gradient(180deg, rgba(5,5,10,.78), rgba(5,5,10,.35));
+    border-bottom:1px solid var(--stroke);
+  }
+  .header__inner{
+    max-width:1180px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+  }
+  .logo{
+    display:flex; align-items:center; gap:11px;
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:17px; letter-spacing:.4px; text-decoration:none; color:var(--text);
+  }
+  .logo__mark{
+    width:34px; height:34px; border-radius:11px;
+    background:conic-gradient(from 210deg, var(--violet), var(--cyan), var(--pink), var(--violet));
+    box-shadow:0 0 24px rgba(124,92,255,.55), inset 0 0 14px rgba(255,255,255,.25);
+    animation:spin 9s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .logo__dot{ color:var(--violet); }
+
+  .nav{ display:flex; gap:26px; }
+  .nav a{
+    color:var(--muted); text-decoration:none; font-size:14.5px; font-weight:500;
+    position:relative; transition:color .25s var(--ease);
+  }
+  .nav a::after{
+    content:''; position:absolute; left:0; bottom:-6px; width:0; height:2px;
+    border-radius:2px; background:linear-gradient(90deg, var(--violet), var(--cyan));
+    transition:width .3s var(--ease);
+  }
+  .nav a:hover{ color:var(--text); }
+  .nav a:hover::after{ width:100%; }
+
+  /* ============ ОБЩЕЕ ============ */
+  .wrap{ max-width:1180px; margin:0 auto; padding:0 24px; }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:14px 28px; border-radius:999px; border:0; cursor:pointer;
+    font-family:inherit; font-size:15px; font-weight:700; text-decoration:none;
+    color:#0a0714;
+    background:linear-gradient(135deg, var(--cyan), var(--violet) 55%, var(--pink));
+    background-size:200% 200%;
+    box-shadow:0 10px 34px -10px rgba(124,92,255,.85);
+    transition:transform .25s var(--ease), box-shadow .25s var(--ease), background-position .6s var(--ease);
+  }
+  .btn:hover{
+    transform:translateY(-2px); background-position:100% 50%;
+    box-shadow:0 16px 44px -12px rgba(124,92,255,1);
+  }
+  .btn:active{ transform:translateY(0) scale(.985); }
+
+  .section-title{
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:clamp(24px, 3.4vw, 38px); line-height:1.15; margin:0 0 14px;
+    letter-spacing:-.5px;
+  }
+  .section-sub{ color:var(--muted); margin:0 0 38px; font-size:16px; max-width:640px; }
+
+  /* ============ HERO ============ */
+  .hero{ padding:clamp(64px, 11vw, 130px) 0 clamp(48px, 7vw, 80px); }
+  .hero__badge{
+    display:inline-flex; align-items:center; gap:9px;
+    padding:8px 16px; border-radius:999px; margin-bottom:26px;
+    background:var(--panel); border:1px solid var(--stroke);
+    font-size:13px; color:var(--muted);
+    backdrop-filter:blur(10px);
+  }
+  .hero__badge i{
+    width:7px; height:7px; border-radius:50%; background:var(--cyan);
+    box-shadow:0 0 12px var(--cyan);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+  .hero h1{
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:clamp(34px, 6.6vw, 74px); line-height:1.04; letter-spacing:-1.5px;
+    margin:0 0 22px; max-width:15ch;
+  }
+  .hero h1 em{
+    font-style:normal;
+    background:linear-gradient(105deg, var(--cyan), var(--violet) 45%, var(--pink) 85%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 26px rgba(124,92,255,.35));
+  }
+  .hero p{
+    font-size:clamp(15px, 1.7vw, 18px); line-height:1.65; color:var(--muted);
+    max-width:52ch; margin:0 0 36px;
+  }
+  .hero__actions{ display:flex; flex-wrap:wrap; gap:14px; }
+
+  .btn-ghost{
+    display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    padding:14px 28px; border-radius:999px;
+    border:1px solid var(--stroke-2); color:var(--text); text-decoration:none;
+    font-weight:600; font-size:15px; background:var(--panel);
+    backdrop-filter:blur(10px); transition:.25s var(--ease);
+  }
+  .btn-ghost:hover{ background:var(--panel-2); border-color:rgba(255,255,255,.32); transform:translateY(-2px); }
+
+  /* ============ СТАТИСТИКА ============ */
+  .stats{
+    padding:0 0 clamp(40px, 6vw, 72px);
+  }
+  .stats__grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr));
+    gap:12px;
+  }
+  .stat{
+    padding:22px 20px; border-radius:var(--radius);
+    background:var(--panel); border:1px solid var(--stroke);
+    backdrop-filter:blur(14px);
+  }
+  .stat b{
+    display:block; font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:clamp(22px, 3vw, 32px); letter-spacing:-.5px;
+    background:linear-gradient(120deg, var(--cyan), var(--violet), var(--pink));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .stat span{ display:block; font-size:13.5px; color:var(--muted); margin-top:4px; }
+
+  /* ============ МЕНЮ / ПРАЙС ============ */
+  .halls{ padding:clamp(20px,4vw,50px) 0 clamp(40,6vw,90px); }
+  .cards{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+    gap:20px;
+  }
+
+  .card{
+    position:relative; overflow:hidden;
+    border-radius:var(--radius);
+    background:var(--panel); border:1px solid var(--stroke);
+    backdrop-filter:blur(14px);
+    transition:transform .35s var(--ease), border-color .35s var(--ease), box-shadow .35s var(--ease);
+    display:flex; flex-direction:column;
+  }
+  .card::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(360px circle at var(--cx,50%) var(--cy,0%),
+      var(--accent-soft, rgba(124,92,255,.22)), transparent 65%);
+    opacity:0; transition:opacity .4s var(--ease);
+  }
+  .card:hover{ transform:translateY(-6px); border-color:var(--stroke-2);
+    box-shadow:0 24px 60px -28px var(--accent, rgba(124,92,255,.6)); }
+  .card:hover::after{ opacity:1; }
+
+  /* варианты акцентов */
+  .card--cyan  { --accent:rgba(34,211,238,.75);  --accent-soft:rgba(34,211,238,.22); }
+  .card--violet{ --accent:rgba(124,92,255,.85);  --accent-soft:rgba(124,92,255,.24); }
+  .card--pink  { --accent:rgba(255,92,157,.85);  --accent-soft:rgba(255,92,157,.22); }
+  .card--gold  { --accent:rgba(255,184,107,.85); --accent-soft:rgba(255,184,107,.20); }
+  .card--teal  { --accent:rgba(45,212,191,.85);  --accent-soft:rgba(45,212,191,.20); }
+  .card--rose  { --accent:rgba(251,113,133,.85); --accent-soft:rgba(251,113,133,.20); }
+  .card--lime  { --accent:rgba(163,230,53,.85);  --accent-soft:rgba(163,230,53,.20); }
+
+  .card__image{
+    position:relative; aspect-ratio:16/10; overflow:hidden;
+    background:
+      linear-gradient(135deg, var(--accent-soft), transparent 65%),
+      linear-gradient(180deg, #12121c, #0a0a12);
+    border-bottom:1px solid var(--stroke);
+  }
+  .card__image img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    transform:scale(1.02);
+    transition:transform .8s var(--ease), opacity .3s ease;
+    opacity:.9;
+  }
+  .card:hover .card__image img{ transform:scale(1.08); opacity:1; }
+  .card__image::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 45%, rgba(5,5,10,.75));
+    pointer-events:none;
+  }
+  .card__image.is-failed img{ display:none; }
+  .card__image-fallback{
+    position:absolute; inset:0; display:grid; place-items:center;
+    font-size:68px; opacity:.85;
+    background:
+      radial-gradient(circle at 30% 30%, var(--accent-soft), transparent 65%),
+      linear-gradient(180deg, #15151f, #0a0a12);
+  }
+  .card__image:not(.is-failed) .card__image-fallback{ display:none; }
+
+  .card__badge{
+    position:absolute; top:12px; left:12px; z-index:2;
+    padding:6px 12px; border-radius:999px;
+    font-size:11.5px; font-weight:700; letter-spacing:.5px; text-transform:uppercase;
+    color:#0a0714;
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+  }
+  .card__badge--gold{ background:linear-gradient(135deg, var(--gold), var(--pink)); }
+  .card__badge--lime{ background:linear-gradient(135deg, var(--lime), var(--teal)); color:#04211a; }
+
+  .card__body{ padding:20px 22px 22px; display:flex; flex-direction:column; gap:10px; flex:1; }
+  .card__title{
+    margin:0; font-family:'Unbounded', sans-serif; font-weight:600;
+    font-size:16.5px; line-height:1.3; letter-spacing:-.2px;
+  }
+  .card__desc{ margin:0; font-size:13.5px; line-height:1.6; color:var(--muted); flex:1; }
+  .card__meta{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-top:6px; padding-top:14px; border-top:1px dashed var(--stroke);
+  }
+  .card__price{
+    font-family:'Unbounded', sans-serif; font-weight:700;
+    font-size:19px; letter-spacing:-.3px;
+    color:var(--text);
+  }
+  .card__price small{
+    display:block; font-family:'Manrope'; font-weight:500;
+    font-size:11.5px; letter-spacing:.4px; color:var(--muted);
+    text-transform:uppercase; margin-top:2px;
+  }
+  .card__cta{
+    font-size:13px; font-weight:700; text-decoration:none;
+    color:var(--text); padding:8px 14px; border-radius:10px;
+    background:rgba(255,255,255,.06); border:1px solid var(--stroke);
+    transition:.25s var(--ease);
+  }
+  .card__cta:hover{ background:var(--accent-soft); border-color:var(--accent); }
+
+  /* ============ ОТЗЫВЫ ============ */
+  .reviews{ padding:clamp(30,5vw,70px) 0; }
+  .reviews__grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr));
+    gap:18px;
+  }
+  .review{
+    position:relative; padding:24px 22px; border-radius:var(--radius);
+    background:var(--panel); border:1px solid var(--stroke);
+    backdrop-filter:blur(14px);
+    transition:transform .35s var(--ease), border-color .35s var(--ease);
+  }
+  .review:hover{ transform:translateY(-4px); border-color:var(--stroke-2); }
+  .review__top{ display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .avatar{
+    width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+    font-family:'Unbounded', sans-serif; font-weight:700; font-size:16px; color:#0a0714;
+    flex-shrink:0;
+  }
+  .avatar--1{ background:linear-gradient(135deg, var(--cyan), var(--violet)); }
+  .avatar--2{ background:linear-gradient(135deg, var(--pink), var(--gold)); }
+  .avatar--3{ background:linear-gradient(135deg, var(--teal), var(--cyan)); }
+  .avatar--4{ background:linear-gradient(135deg, var(--lime), var(--teal)); }
+  .avatar--5{ background:linear-gradient(135deg, var(--rose), var(--pink)); }
+  .avatar--6{ background:linear-gradient(135deg, var(--gold), var(--rose)); }
+  .review__name{ font-weight:700; font-size:14.5px; }
+  .review__meta{ font-size:12px; color:var(--muted); }
+  .review__stars{
+    margin-left:auto; font-size:13px; letter-spacing:1px;
+    color:var(--gold);
+  }
+  .review__text{
+    margin:0; font-size:14px; line-height:1.65; color:#c9cbd8;
+  }
+  .review__text::before{
+    content:'«'; margin-right:2px; color:var(--violet); font-weight:700;
+  }
+  .review__text::after{
+    content:'»'; margin-left:2px; color:var(--violet); font-weight:700;
+  }
+
+  /* ============ ФОРМА ============ */
+  .booking{ padding:clamp(30,5vw,80px) 0 110px; }
+
+  .panel{
+    position:relative;
+    padding:clamp(24px, 4vw, 46px);
+    border-radius:32px;
+    background:linear-gradient(160deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+    border:1px solid var(--stroke);
+    backdrop-filter:blur(22px) saturate(130%);
+    -webkit-backdrop-filter:blur(22px) saturate(130%);
+    box-shadow:0 40px 100px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.09);
+    overflow:hidden;
+  }
+  .panel::before{
+    content:''; position:absolute; top:0; left:12%; right:12%; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(124,92,255,.9), rgba(34,211,238,.9), transparent);
+  }
+
+  .form-grid{
+    display:grid; grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:16px 18px; margin-top:32px;
+  }
+  .field{ position:relative; }
+  .field--full{ grid-column:1 / -1; }
+
+  .field label{
+    display:block; font-size:12.5px; font-weight:600; letter-spacing:.4px;
+    text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea{
+    width:100%; padding:14px 16px;
+    font-family:inherit; font-size:15px; color:var(--text);
+    background:rgba(255,255,255,.045);
+    border:1px solid var(--stroke);
+    border-radius:14px;
+    outline:none; color-scheme:dark;
+    transition:border-color .25s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease);
+  }
+  .field textarea{ resize:vertical; min-height:96px; }
+  .field input::placeholder, .field textarea::placeholder{ color:rgba(154,160,180,.55); }
+
+  .field input:focus,
+  .field select:focus,
+  .field textarea:focus{
+    border-color:rgba(124,92,255,.85);
+    background:rgba(255,255,255,.07);
+    box-shadow:0 0 0 4px rgba(124,92,255,.16);
+  }
+
+  .field select{
+    appearance:none; cursor:pointer;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239aa0b4' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 16px center;
+    padding-right:42px;
+  }
+  .field select option{ background:#0e0e16; color:var(--text); }
+
+  .hp{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; pointer-events:none; }
+
+  .form-footer{
+    display:flex; flex-wrap:wrap; align-items:center; gap:16px;
+    margin-top:26px; justify-content:space-between;
+  }
+  .form-note{ font-size:13px; color:var(--muted); max-width:42ch; line-height:1.55; }
+
+  .status{
+    margin-top:18px; padding:14px 18px; border-radius:14px; font-size:14.5px;
+    display:none; font-weight:600;
+  }
+  .status.show{ display:block; animation:fadeIn .35s var(--ease); }
+  .status.ok{ background:rgba(34,211,238,.12); border:1px solid rgba(34,211,238,.4); color:#a8f0ff; }
+  .status.err{ background:rgba(255,92,157,.12); border:1px solid rgba(255,92,157,.4); color:#ffb3cd; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+
+  .btn[disabled]{ opacity:.6; cursor:not-allowed; transform:none !important; }
+
+  /* ============ КОНТАКТЫ / ФУТЕР ============ */
+  .contacts{ padding:clamp(20,4vw,60px) 0 40px; }
+  .contact-grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:14px;
+  }
+  .contact{
+    padding:22px 20px; border-radius:18px;
+    background:var(--panel); border:1px solid var(--stroke);
+    backdrop-filter:blur(14px);
+  }
+  .contact__label{ font-size:12px; letter-spacing:.5px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
+  .contact__value{ font-size:15px; font-weight:600; line-height:1.5; }
+  .contact__value a{ color:var(--text); text-decoration:none; }
+  .contact__value a:hover{ color:var(--cyan); }
+
+  .footer{
+    border-top:1px solid var(--stroke); padding:34px 0 46px;
+    color:var(--muted); font-size:14px;
+  }
+  .footer__inner{ display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:center; }
+  .footer a{ color:var(--text); text-decoration:none; }
+  .footer a:hover{ color:var(--cyan); }
+
+  /* ============ АНИМАЦИЯ ============ */
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s var(--ease), transform .7s var(--ease); }
+  .reveal.in{ opacity:1; transform:none; }
+
+  /* ============ АДАПТИВ ============ */
+  @media (max-width: 760px){
+    .nav{ display:none; }
+    .form-grid{ grid-template-columns:1fr; }
+    .form-footer{ flex-direction:column; align-items:stretch; }
+    .form-footer .btn{ width:100%; }
+    .hero h1{ max-width:none; }
+    .card__image{ aspect-ratio:16/9; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation:none !important; transition-duration:.01ms !important; }
+    .reveal{ opacity:1; transform:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== ЖИВОЙ ФОН ===== -->
+  <div class="bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="grid"></div>
+    <div class="cursor-glow" id="cursorGlow"></div>
+    <div class="noise"></div>
+  </div>
+
+  <!-- ===== ХЕДЕР ===== -->
+  <header class="header">
+    <div class="header__inner">
+      <a class="logo" href="#top">
+        <span class="logo__mark"></span>
+        Soul<span class="logo__dot">·</span>Play
+      </a>
+      <nav class="nav">
+        <a href="#halls">Прайс</a>
+        <a href="#reviews">Отзывы</a>
+        <a href="#booking">Бронирование</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+      <a class="btn-ghost" href="#booking">Забронировать</a>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero__badge"><i></i> Новочебоксарск · Строителей 23к1</div>
+        <h1>Играй.<br>Отдыхай.<br>Возвращайся <em>снова</em>.</h1>
+        <p>
+          Soul Play — компьютерный клуб с игровыми ПК, PS5 и уютными VIP-залами.
+          Приходи один, с друзьями или всей командой — у нас найдётся место под любой формат.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href="#booking">Забронировать →</a>
+          <a class="btn-ghost" href="#halls">Посмотреть цены</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== СТАТИСТИКА ===== -->
+    <section class="stats">
+      <div class="wrap">
+        <div class="stats__grid">
+          <div class="stat"><b>20+</b><span>игровых ПК</span></div>
+          <div class="stat"><b>4</b><span>PS5 в общем зале</span></div>
+          <div class="stat"><b>24/7</b><span>ночной пакет</span></div>
+          <div class="stat"><b>140₽</b><span>от / час</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== МЕНЮ / ПРАЙС ===== -->
+    <section class="halls" id="halls">
+      <div class="wrap">
+        <h2 class="section-title reveal">Залы и услуги</h2>
+        <p class="section-sub reveal">Каждый зал — со своим характером. Выбери свой.</p>
+
+        <div class="cards">
+
+          <article class="card card--cyan reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=600&q=80&auto=format&fit=crop" alt="БАЗА общий зал компьютерный" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🖥️</span>
+              <span class="card__badge">БАЗА</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">БАЗА — общий компьютерный зал</h3>
+              <p class="card__desc">Комфортный зал на 20 ПК. Пакеты «Утро» (08:00–13:00) и «Ночь» (22:00–08:00) — выгодно.</p>
+              <div class="card__meta">
+                <div class="card__price">140 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--violet reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&q=80&auto=format&fit=crop" alt="ВИП зал компьютерный 5 ПК" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🎮</span>
+              <span class="card__badge">ВИП</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">ВИП-зал компьютерный (5 ПК)</h3>
+              <p class="card__desc">Отдельный зал на 5 человек. Приватная атмосфера, мощные ПК, пакеты «Утро» и «Ночь».</p>
+              <div class="card__meta">
+                <div class="card__price">160 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--pink reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&q=80&auto=format&fit=crop" alt="Общий зал с приставками" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🕹️</span>
+              <span class="card__badge">Приставки</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">Общий зал с приставками</h3>
+              <p class="card__desc">4 приставки PS5 до 5 человек каждая, большой экран. Дни рождения, просмотры матчей и стримы.</p>
+              <div class="card__meta">
+                <div class="card__price">300 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--gold reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=600&q=80&auto=format&fit=crop" alt="ВИП зал с приставкой" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">📺</span>
+              <span class="card__badge card__badge--gold">Проектор</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">ВИП-зал с приставкой</h3>
+              <p class="card__desc">Отдельная комната с PS5, большим проектором Full HD и объёмным звуком. Кино, футбол, кооп.</p>
+              <div class="card__meta">
+                <div class="card__price">500 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--teal reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80&auto=format&fit=crop" alt="ДУО 2 ПК" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">👥</span>
+              <span class="card__badge card__badge--lime">Для двоих</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">ДУО — комната на 2 ПК</h3>
+              <p class="card__desc">Приватная комната на 2 компьютера. Идеально для пары, друзей или командной сессии.</p>
+              <div class="card__meta">
+                <div class="card__price">200 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--rose reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=600&q=80&auto=format&fit=crop" alt="СОЛО 1 ПК" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🎧</span>
+              <span class="card__badge">Приват</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">СОЛО — комната на 1 ПК</h3>
+              <p class="card__desc">Приватное пространство с мощным ПК. Для игры, работы и полной тишины.</p>
+              <div class="card__meta">
+                <div class="card__price">250 ₽<small>за час</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--lime reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=600&q=80&auto=format&fit=crop" alt="Напитки и снеки" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🥤</span>
+              <span class="card__badge card__badge--lime">Снеки</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">Напитки и снеки</h3>
+              <p class="card__desc">Большой выбор напитков и закусок — чтобы ничто не отвлекало от игры.</p>
+              <div class="card__meta">
+                <div class="card__price">100 ₽<small>за штуку</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card card--gold reveal">
+            <div class="card__image">
+              <img src="https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&q=80&auto=format&fit=crop" alt="Подарочный сертификат" loading="lazy" onerror="this.closest('.card__image').classList.add('is-failed')">
+              <span class="card__image-fallback">🎁</span>
+              <span class="card__badge card__badge--gold">Подарок</span>
+            </div>
+            <div class="card__body">
+              <h3 class="card__title">Подарочный сертификат</h3>
+              <p class="card__desc">Подари эмоции: часы игры на мощных ПК, киберспорт или кооп с друзьями.</p>
+              <div class="card__meta">
+                <div class="card__price">500 ₽<small>за штуку</small></div>
+                <a class="card__cta" href="#booking">Забронировать</a>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ОТЗЫВЫ ===== -->
+    <section class="reviews" id="reviews">
+      <div class="wrap">
+        <h2 class="section-title reveal">Что говорят гости</h2>
+        <p class="section-sub reveal">Реальные впечатления от тех, кто уже играл у нас.</p>
+
+        <div class="reviews__grid">
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--1">А</div>
+              <div>
+                <div class="review__name">Артём</div>
+                <div class="review__meta">2 недели назад · ВИП-зал ПК</div>
+              </div>
+              <div class="review__stars">★★★★★</div>
+            </div>
+            <p class="review__text">Бронировали ВИП на 5 человек на день рождения. Отдельный зал, никто не мешает, компы летают. Взяли пакет «Ночь» — выгодно и весело. Вернёмся!</p>
+          </article>
+
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--2">М</div>
+              <div>
+                <div class="review__name">Марина</div>
+                <div class="review__meta">неделю назад · ВИП с приставкой</div>
+              </div>
+              <div class="review__stars">★★★★★</div>
+            </div>
+            <p class="review__text">Смотрели футбол на проекторе — как в кинотеатре, только с диваном и снеками. Звук отличный, картинка чёткая. Отдельное спасибо за сервис: заявку подтвердили быстро.</p>
+          </article>
+
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--3">Д</div>
+              <div>
+                <div class="review__name">Дмитрий</div>
+                <div class="review__meta">3 недели назад · ДУО</div>
+              </div>
+              <div class="review__stars">★★★★★</div>
+            </div>
+            <p class="review__text">Приходим с девушкой в ДУО — уютно, приватно, никто не отвлекает. Цена честная. Из плюсов — можно заказать напитки прямо в зал.</p>
+          </article>
+
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--4">К</div>
+              <div>
+                <div class="review__name">Кирилл</div>
+                <div class="review__meta">месяц назад · БАЗА</div>
+              </div>
+              <div class="review__stars">★★★★☆</div>
+            </div>
+            <p class="review__text">Хорошая база: 20 компов, все рабочие, инет стабильный. Пакет «Утро» за 300₽ — вообще топ для катки перед учёбой. Минус — иногда в выходные много народу, лучше бронировать заранее.</p>
+          </article>
+
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--5">Е</div>
+              <div>
+                <div class="review__name">Елена</div>
+                <div class="review__meta">2 месяца назад · Подарочный сертификат</div>
+              </div>
+              <div class="review__stars">★★★★★</div>
+            </div>
+            <p class="review__text">Брала сертификат в подарок мужу — оформили красиво, он был в восторге. Потом сходили вместе в общий зал с приставками, поиграли в PS5. Атмосфера супер.</p>
+          </article>
+
+          <article class="review reveal">
+            <div class="review__top">
+              <div class="avatar avatar--6">С</div>
+              <div>
+                <div class="review__name">Сергей</div>
+                <div class="review__meta">неделю назад · СОЛО</div>
+              </div>
+              <div class="review__stars">★★★★★</div>
+            </div>
+            <p class="review__text">СОЛО — моё спасение. Иногда нужно поработать или просто побыть в тишине, а не дома. Отдельная комната, мощный ПК, никто не дёргает. Рекомендую.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== БРОНИРОВАНИЕ ===== -->
+    <section class="booking" id="booking">
+      <div class="wrap">
+        <div class="panel reveal">
+          <h2 class="section-title">Забронировать</h2>
+          <p class="section-sub" style="margin-bottom:0">
+            Оставьте заявку — мы подтвердим бронь и свяжемся с вами.
+          </p>
+
+          <form id="bookingForm" novalidate>
+            <div class="form-grid">
+              <div class="field">
+                <label for="name">Имя *</label>
+                <input id="name" name="name" type="text" placeholder="Как к вам обращаться" maxlength="60" required autocomplete="name">
+              </div>
+
+              <div class="field">
+                <label for="phone">Телефон *</label>
+                <input id="phone" name="phone" type="tel" placeholder="+7 999 123-45-67" maxlength="20" required autocomplete="tel">
+              </div>
+
+              <div class="field">
+                <label for="hall">Зал / услуга *</label>
+                <select id="hall" name="hall" required>
+                  <option value="" disabled selected>Выберите зал</option>
+                  <option>БАЗА — общий зал (20 ПК)</option>
+                  <option>ВИП-зал компьютерный (5 ПК)</option>
+                  <option>Общий зал с приставками (PS5)</option>
+                  <option>ВИП-зал с приставкой (проектор)</option>
+                  <option>ДУО — комната на 2 ПК</option>
+                  <option>СОЛО — комната на 1 ПК</option>
+                  <option>Напитки и снеки</option>
+                  <option>Подарочный сертификат</option>
+                  <option>Другое — уточню по телефону</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="date">Дата *</label>
+                <input id="date" name="date" type="date" required>
+              </div>
+
+              <div class="field">
+                <label for="time">Время *</label>
+                <input id="time" name="time" type="time" required>
+              </div>
+
+              <div class="field">
+                <label for="people">Гостей</label>
+                <input id="people" name="people" type="number" min="1" max="30" placeholder="Например, 4">
+              </div>
+
+              <div class="field">
+                <label for="hours">Длительность, ч</label>
+                <input id="hours" name="hours" type="number" min="1" max="12" placeholder="Например, 2">
+              </div>
+
+              <div class="field field--full">
+                <label for="comment">Комментарий</label>
+                <textarea id="comment" name="comment" maxlength="300" placeholder="Пожелания, день рождения, нужен ли проектор…"></textarea>
+              </div>
+
+              <div class="hp" aria-hidden="true">
+                <label for="website">Website</label>
+                <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-footer">
+              <p class="form-note">Нажимая «Отправить», вы соглашаетесь на обработку персональных данных.</p>
+              <button class="btn" type="submit" id="submitBtn">Отправить заявку</button>
+            </div>
+
+            <div class="status" id="status" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== КОНТАКТЫ ===== -->
+    <section class="contacts" id="contacts">
+      <div class="wrap">
+        <h2 class="section-title reveal">Контакты</h2>
+        <p class="section-sub reveal">Ждём в гости каждый день.</p>
+
+        <div class="contact-grid">
+          <div class="contact reveal">
+            <div class="contact__label">Адрес</div>
+            <div class="contact__value">Новочебоксарск,<br>ул. Строителей, 23, корп. 1</div>
+          </div>
+          <div class="contact reveal">
+            <div class="contact__label">Телефон</div>
+            <div class="contact__value"><a href="tel:+79276665751">+7 927 666-57-51</a></div>
+          </div>
+          <div class="contact reveal">
+            <div class="contact__label">Режим работы</div>
+            <div class="contact__value">Круглосуточно<br>Пакет «Ночь»: 22:00 – 08:00</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer__inner">
+      <span>© <span id="year"></span> Soul Play</span>
+      <span>Новочебоксарск · <a href="tel:+79276665751">+7 927 666-57-51</a></span>
+    </div>
+  </footer>
+
+<script>
+  /* ---------- год ---------- */
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---------- минимальная дата = сегодня ---------- */
+  const dateInput = document.getElementById('date');
+  const today = new Date();
+  const iso = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+    .toISOString().slice(0, 10);
+  dateInput.min = iso;
+
+  /* ---------- свечение за курсором ---------- */
+  const glow = document.getElementById('cursorGlow');
+  let rafId = null, mx = 50, my = 50;
+  window.addEventListener('pointermove', (e) => {
+    mx = (e.clientX / window.innerWidth) * 100;
+    my = (e.clientY / window.innerHeight) * 100;
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      glow.style.setProperty('--mx', mx + '%');
+      glow.style.setProperty('--my', my + '%');
+      rafId = null;
+    });
+  }, { passive: true });
+
+  /* ---------- подсветка карточек ---------- */
+  document.querySelectorAll('.card').forEach((card) => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--cx', ((e.clientX - r.left) / r.width) * 100 + '%');
+      card.style.setProperty('--cy', ((e.clientY - r.top) / r.height) * 100 + '%');
+    });
+  });
+
+  /* ---------- появление при скролле ---------- */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  /* ---------- отправка формы ---------- */
+  const form   = document.getElementById('bookingForm');
+  const status = document.getElementById('status');
+  const btn    = document.getElementById('submitBtn');
+
+  function showStatus(text, type) {
+    status.textContent = text;
+    status.className = 'status show ' + type;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Отправляем…';
+    status.className = 'status';
+
+    const fd = new FormData(form);
+    const payload = Object.fromEntries(fd.entries());
+
+    try {
+      const res = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.ok) {
+        showStatus('Заявка принята! Мы свяжемся с вами для подтверждения.', 'ok');
+        form.reset();
+        dateInput.min = iso;
+      } else {
+        showStatus(data.error || 'Не удалось отправить заявку. Попробуйте ещё раз.', 'err');
+      }
+    } catch (err) {
+      showStatus('Ошибка сети. Проверьте подключение и попробуйте снова.', 'err');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+</script>
+</body>
+</html>
